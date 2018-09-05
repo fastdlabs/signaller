@@ -34,12 +34,13 @@ class GuzzleClient implements ClientInterface
     }
 
     /**
-     * @param string $route
+     * @param string $method
+     * @param string $uri
      * @param array $parameters
-     * @param array $headers
+     * @param array $options
      * @return $this
      */
-    public function select(string $method, string $uri, array $parameters = [], array $options = [])
+    public function asyncRequest(string $method, string $uri, array $parameters = [], array $options = [])
     {
         $options = array_merge([
             'connect_timeout' => 5,
@@ -74,16 +75,44 @@ class GuzzleClient implements ClientInterface
     }
 
     /**
+     * @return array|Response
      * @throws \Throwable
      */
-    public function send()
+    public function select()
     {
         $response = Promise\unwrap($this->promises);
         if (1 === count($response)) {
-            return Response::createFromResponse($response[0]);
+            return current($this->createResponse($response));
+
         } else {
             return $this->createResponse($response);
         }
+    }
+
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param array $parameters
+     * @param array $options
+     * @return ClientInterface|Response
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
+     */
+    public function request(string $method, string $uri, array $parameters = [], array $options = [])
+    {
+        $options = array_merge([
+            'connect_timeout' => 5,
+            'timeout' => 5,
+            'http_errors' => false,
+        ], $options);
+
+        $response = $this->client->request(
+            $method,
+            $uri,
+            $this->createRequestOptions($method, $parameters, $options)
+        );
+
+        return Response::createFromResponse($response);
     }
 
     /**

@@ -43,12 +43,22 @@ class Service
      * @param array $options
      * @return $this
      */
-    public function select(string $serverName, string $route, $parameters = null, array $options = [])
+    public function asyncRequest(string $serverName, string $route, $parameters = null, array $options = [])
     {
         $route = $this->sentinel->route($serverName, $route);
         $uri = $this->getUri($serverName, $route[1]);
 
-        $this->client->select($route[0], $uri, $parameters, $options);
+        $this->client->asyncRequest($route[0], $uri, $parameters, $options);
+
+        return $this;
+    }
+
+    public function request(string $serverName, string $route, $parameters = null, array $options = [])
+    {
+        $route = $this->sentinel->route($serverName, $route);
+        $uri = $this->getUri($serverName, $route[1]);
+
+        $this->client->request($route[0], $uri, $parameters, $options);
 
         return $this;
     }
@@ -56,9 +66,9 @@ class Service
     /**
      * @return Response
      */
-    public function send()
+    public function select()
     {
-        return $this->client->send();
+        return $this->client->select();
     }
 
     public function getUri($serverName, $path)

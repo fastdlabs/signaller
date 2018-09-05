@@ -6,10 +6,9 @@
 
 namespace Sdk\Signaller;
 
-use FastD\Utils\ArrayObject;
 use Sdk\Signaller\Contracts\SentinelInterface;
 
-class Sentinel extends ArrayObject implements SentinelInterface
+class Sentinel implements SentinelInterface
 {
 
     /**
@@ -41,7 +40,7 @@ class Sentinel extends ArrayObject implements SentinelInterface
      *
      * @return array
      */
-    public function list() : array
+    public function list(): array
     {
         $services = glob($this->path . '/*.php');
 
@@ -118,11 +117,23 @@ class Sentinel extends ArrayObject implements SentinelInterface
      * @param string $path
      * @return array
      */
-    public function route(string $serviceName, string $path) : array
+    public function route(string $serviceName, string $path): array
     {
         $node = $this->getNode($serviceName);
 
         return $node['routes'][$path];
+    }
+
+    /**
+     * 获取节点状态
+     *
+     * @param string $serviceName
+     * @param string $path
+     * @return array
+     */
+    public function status(string $serviceName, string $path): array
+    {
+        // TODO: Implement status() method.
     }
 
     /**
@@ -143,7 +154,7 @@ class Sentinel extends ArrayObject implements SentinelInterface
      * @param array $nodes
      * @return array
      */
-    protected function setNode(array $nodes)
+    protected function setNode(array $nodes): array
     {
         // todo 暂时为随机数 服务状态 连接数 成功数 失败数 权重
         $count = count($nodes);
@@ -151,17 +162,6 @@ class Sentinel extends ArrayObject implements SentinelInterface
         return $nodes[mt_rand(0, $count - 1)];
     }
 
-    /**
-     * 获取节点状态
-     *
-     * @param string $serviceName
-     * @param string $path
-     * @return array
-     */
-    public function status(string $serviceName, string $path)
-    {
-        // TODO: Implement status() method.
-    }
 
     public function __destruct()
     {

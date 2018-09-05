@@ -6,17 +6,35 @@
 
 namespace Sdk\Signaller\Contracts;
 
+use Sdk\Signaller\Response;
+
+/**
+ * Interface ClientInterface
+ * @package Sdk\Signaller\Contracts
+ */
 interface ClientInterface
 {
 
     /**
+     * @param string $method
      * @param string $uri
-     * @param array $route
      * @param array $parameters
-     * @param array $headers
-     * @return mixed
+     * @param array $options
+     * @return $this
      */
-    public function select(string $method, string $uri, array $parameters = [], array $headers = []);
+    public function asyncRequest(string $method, string $uri, array $parameters = [], array $options = []);
 
-    public function send();
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param array $parameters
+     * @param array $options
+     * @return ClientInterface|Response
+     */
+    public function request(string $method, string $uri, array $parameters = [], array $options = []);
+
+    /**
+     * @return Response|array
+     */
+    public function select();
 }

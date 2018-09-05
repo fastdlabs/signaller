@@ -17,7 +17,10 @@ class Response extends FastDResponse
      */
     public function toArray()
     {
-        return json_decode((string)$this->getBody(), true);
+        $result = json_decode((string)$this->getBody(), true);
+        is_null($result) && $result = [(string)$this->getBody()];
+
+        return $result;
     }
 
     /**
