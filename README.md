@@ -1,54 +1,36 @@
-# SDK for Services
 
-## 外部调用 (经由网关)
-
-```php
-<?php
-
-use Sdk\Service\Service;
-
-$service = new Service(Service::MODEL_GATEWAY, 'xxxxxxxxx', true);
-
-$response = $sdk->get(Service::SERVICE_ORDER, '/orders/ZWZJ151324829100000020');
-
-if ($response->isSuccessful()) {
-    return $response->toArray();
-}
+# signaller
 
 ```
 
-## 服务间调用 (经由SLB)
-```php
-<?php
-use Sdk\Service\Service;
+require __DIR__ . '/vendor/autoload.php';
 
-/**
- * 可以不用设置消费者, 会从请求中自动获取消费者 ID
- */
+use Sdk\Signaller\Sentinel;
+use Sdk\Signaller\Service;
 
-$service = new Service(null, true);
 
-$response = $sdk->get(Service::SERVICE_ORDER, '/orders/ZWZJ151324829100000020');
+$sdk = new Service();
 
-if ($response->isSuccessful()) {
-    return $response->toArray();
-}
-```
-
-## 上传文件
-上传普通文件
-```php
-<?php
-use Sdk\Service\Service;
-
-$service = new Service(Service::MODEL_SLB, null, true);
-
-$response = $service->post(Service::SERVICE_ORDER, '/orders', [
-    'images' => '/Users/runner/Downloads/demo.gid',
+$sdk->asyncRequest('service-language-switch', '/v1/switch', ['以后'], [
+    'headers' => [
+        'x_consumer_custom_id' => 1,
+        'accept_language' => 'zh-TW'
+    ],
+    'body' => '以后'
+]);
+$sdk->asyncRequest('service-language-switch', '/v1/switch', ['我们以后'], [
+    'headers' => [
+        'x_consumer_custom_id' => 1,
+        'accept_language' => 'zh-TW'
+    ],
 ]);
 
-if ($response->isSuccessful()) {
-    return $response->toArray();
+$responses = $sdk->select();
+
+foreach ($responses as $response) {
+    var_dump($response->isSuccessful());
+    var_dump($response->toArray());
 }
+
 
 ```
