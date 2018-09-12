@@ -41,11 +41,11 @@ class Service
     /**
      * @param string $serverName
      * @param string $route
-     * @param null $parameters
+     * @param array $parameters
      * @param array $options
      * @return $this
      */
-    public function asyncRequest(string $serverName, string $route, $parameters = null, array $options = [])
+    public function asyncRequest(string $serverName, string $route, $parameters = [], array $options = [])
     {
         $route = $this->sentinel->route($serverName, $route);
         $uri = $this->getUri($serverName, $route[1]);
@@ -58,11 +58,11 @@ class Service
     /**
      * @param string $serverName
      * @param string $route
-     * @param null $parameters
+     * @param array $parameters
      * @param array $options
      * @return ClientInterface|Response
      */
-    public function request(string $serverName, string $route, $parameters = null, array $options = [])
+    public function request(string $serverName, string $route,array $parameters = [], array $options = [])
     {
         $route = $this->sentinel->route($serverName, $route);
         $uri = $this->getUri($serverName, $route[1]);
