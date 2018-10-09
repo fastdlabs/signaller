@@ -4,7 +4,7 @@
  * @time: 2018/9/3
  */
 
-namespace Sdk\Signaller;
+namespace FastD\Signaller;
 
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use FastD\Http\Response as FastDResponse;

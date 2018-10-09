@@ -4,9 +4,9 @@
  * @time: 2018/9/3
  */
 
-namespace Sdk\Signaller\Contracts;
+namespace FastD\Signaller\Contracts;
 
-use Sdk\Signaller\Response;
+use FastD\Signaller\Response;
 
 /**
  * Interface ClientInterface
@@ -14,16 +14,6 @@ use Sdk\Signaller\Response;
  */
 interface ClientInterface
 {
-
-    /**
-     * @param string $method
-     * @param string $uri
-     * @param array $parameters
-     * @param array $options
-     * @return $this
-     */
-    public function asyncRequest(string $method, string $uri, array $parameters = [], array $options = []);
-
     /**
      * @param string $method
      * @param string $uri
@@ -31,10 +21,6 @@ interface ClientInterface
      * @param array $options
      * @return ClientInterface|Response
      */
-    public function request(string $method, string $uri, array $parameters = [], array $options = []);
+    public function invoke(string $method, string $uri, array $parameters = [], array $options = []);
 
-    /**
-     * @return Response|array
-     */
-    public function select();
 }

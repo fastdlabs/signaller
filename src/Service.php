@@ -4,13 +4,13 @@
  * @time: 2018/9/3
  */
 
-namespace Sdk\Signaller;
+namespace FastD\Signaller;
 
 use Sdk\Signaller\Client\GuzzleClient;
 use Sdk\Signaller\Client\SwooleClient;
 use Sdk\Signaller\Contracts\ClientInterface;
 
-class Service
+class Client
 {
 
     const SWOOLE_CLIENT = 'swoole';
@@ -29,8 +29,9 @@ class Service
     protected $sentinel;
 
     /**
-     * Service constructor.
+     * Client constructor.
      * @param string $client
+     * @param string $path
      */
     public function __construct(string $client = self::GUZZLE_CLIENT, string $path = '/tmp/services')
     {
@@ -43,26 +44,9 @@ class Service
      * @param string $route
      * @param array $parameters
      * @param array $options
-     * @return $this
-     */
-    public function asyncRequest(string $serverName, string $route, $parameters = [], array $options = [])
-    {
-        $route = $this->sentinel->route($serverName, $route);
-        $uri = $this->getUri($serverName, $route[1]);
-
-        $this->client->asyncRequest($route[0], $uri, $parameters, $options);
-
-        return $this;
-    }
-
-    /**
-     * @param string $serverName
-     * @param string $route
-     * @param array $parameters
-     * @param array $options
      * @return ClientInterface|Response
      */
-    public function request(string $serverName, string $route,array $parameters = [], array $options = [])
+    public function invoke(string $serverName, string $route, array $parameters = [], array $options = [])
     {
         $route = $this->sentinel->route($serverName, $route);
         $uri = $this->getUri($serverName, $route[1]);
@@ -71,13 +55,10 @@ class Service
     }
 
     /**
-     * @return Response
+     * @param $serverName
+     * @param $path
+     * @return string
      */
-    public function select()
-    {
-        return $this->client->select();
-    }
-
     public function getUri($serverName, $path)
     {
         return $this->sentinel->protocol($serverName) . '://' .

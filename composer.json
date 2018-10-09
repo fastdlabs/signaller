@@ -1,5 +1,5 @@
 {
-    "name": "sdk/signaller",
+    "name": "fastd/signaller",
     "authors": [
         {
             "name": "ZhaQ",
@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Sdk\\Signaller\\": "src"
+            "FastD\\Signaller\\": "src"
         }
     }
 }

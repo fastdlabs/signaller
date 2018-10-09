@@ -4,7 +4,7 @@
  * @time: 2018/9/3
  */
 
-namespace Sdk\Signaller\Contracts;
+namespace FastD\Signaller\Contracts;
 
 /**
  * Interface SentinelInterface

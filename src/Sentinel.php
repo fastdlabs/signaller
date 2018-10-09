@@ -4,13 +4,12 @@
  * @time: 2018/9/3
  */
 
-namespace Sdk\Signaller;
+namespace FastD\Signaller;
 
-use Sdk\Signaller\Contracts\SentinelInterface;
+use FastD\Signaller\Contracts\SentinelInterface;
 
 class Sentinel implements SentinelInterface
 {
-
     /**
      * @var array
      */
@@ -143,8 +142,12 @@ class Sentinel implements SentinelInterface
     public function getNode(string $serviceName): array
     {
         if (!isset($this->nodes[$serviceName])) {
-            $this->nodes[$serviceName] = include $this->path . '/' . $serviceName . '.php';
             $this->node = $this->setNode($this->nodes[$serviceName]);
+            $nodePath = $this->path . '/' . $serviceName . '.php';
+            if (!file_exists($nodePath)) {
+                throw new \LogicException();
+            }
+            $this->nodes[$serviceName] = include $nodePath;
         }
 
         return $this->node;

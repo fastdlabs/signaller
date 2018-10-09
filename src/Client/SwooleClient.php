@@ -4,9 +4,9 @@
  * @time: 2018/9/4
  */
 
-namespace Sdk\Signaller\Client;
+namespace FastD\Signaller\Client;
 
-use Sdk\Signaller\Contracts\ClientInterface;
+use FastD\Signaller\Contracts\ClientInterface;
 
 class SwooleClient implements ClientInterface
 {
