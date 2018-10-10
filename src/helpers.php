@@ -11,7 +11,8 @@
  * @return \FastD\Signaller\Signaller
  */
 function signaller() {
-    $signaller = new \FastD\Signaller\Signaller();
-
-    return $signaller;
+    if (function_exists('app')) {
+        return app()->get('signaller');
+    }
+    return new \FastD\Signaller\Signaller();
 }
