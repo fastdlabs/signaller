@@ -50,7 +50,7 @@ class Signaller
         $route = $this->sentinel->route($serverName, $route);
         $uri = $this->getUri($serverName, $route[1]);
 
-        return $this->client->request($route[0], $uri, $parameters, $options);
+        return $this->client->invoke($route[0], $uri, $parameters, $options);
     }
 
     /**
