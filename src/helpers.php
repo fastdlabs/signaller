@@ -8,12 +8,10 @@
  */
 
 /**
- * @param $service
- * @param $route
- * @param array $parameters
- * @param array $options
- * @return \Sdk\Signaller\Response
+ * @return \FastD\Signaller\Signaller
  */
-function signaller($service, $route, array $parameters = [], array $options = []) {
+function signaller() {
+    $signaller = new \FastD\Signaller\Signaller();
 
+    return $signaller;
 }

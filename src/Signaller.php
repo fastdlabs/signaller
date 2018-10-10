@@ -6,15 +6,14 @@
 
 namespace FastD\Signaller;
 
-use Sdk\Signaller\Client\GuzzleClient;
-use Sdk\Signaller\Client\SwooleClient;
-use Sdk\Signaller\Contracts\ClientInterface;
+use FastD\Signaller\Client\GuzzleClient;
+use FastD\Signaller\Client\SwooleClient;
+use FastD\Signaller\Contracts\ClientInterface;
 
-class Client
+class Signaller
 {
-
-    const SWOOLE_CLIENT = 'swoole';
-    const GUZZLE_CLIENT = 'guzzle';
+    const SWOOLE_CLIENT = SwooleClient::class;
+    const GUZZLE_CLIENT = GuzzleClient::class;
 
     const TIMEOUT = 'timeout';
 
