@@ -142,12 +142,12 @@ class Sentinel implements SentinelInterface
     public function getNode(string $serviceName): array
     {
         if (!isset($this->nodes[$serviceName])) {
-            $this->node = $this->setNode($this->nodes[$serviceName]);
             $nodePath = $this->path . '/' . $serviceName . '.php';
+            $this->nodes[$serviceName] = include $nodePath;
+            $this->node = $this->setNode($this->nodes[$serviceName]);
             if (!file_exists($nodePath)) {
                 throw new \LogicException();
             }
-            $this->nodes[$serviceName] = include $nodePath;
         }
 
         return $this->node;
