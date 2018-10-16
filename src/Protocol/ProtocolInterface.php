@@ -6,9 +6,7 @@
  * @see      https://www.github.com/fastdlabs
  * @see      http://www.fastdlabs.com/
  */
-
 namespace FastD\Signaller\Protocol;
-
 
 interface ProtocolInterface
 {

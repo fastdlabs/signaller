@@ -9,7 +9,6 @@
 
 namespace FastD\Signaller;
 
-
 use FastD\Container\Container;
 use FastD\Container\ServiceProviderInterface;
 
@@ -17,7 +16,6 @@ class SignallerProvider implements ServiceProviderInterface
 {
     /**
      * @param Container $container
-     * @return mixed
      */
     public function register(Container $container)
     {

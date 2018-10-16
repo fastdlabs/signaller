@@ -47,8 +47,21 @@ class Signaller
      */
     public function invoke(string $serverName, string $route, array $parameters = [], array $options = [])
     {
+        // 解析route, 分离uri参数
+        list($route, $config) = explode('|', false === strpos('|', $route) ? $route . '|' : $route);
+
         $route = $this->sentinel->route($serverName, $route);
         $uri = $this->getUri($serverName, $route[1]);
+
+        if ('' !== $config) {
+            // 动态路由进行赋值
+            foreach (explode(',', $config) as $item) {
+                list($key, $values[]) = explode(':', $item);
+                $keys[] = "{{$key}}";
+            }
+
+            $uri = str_replace($keys, $values, $uri);
+        }
 
         return $this->client->invoke($route[0], $uri, $parameters, $options);
     }

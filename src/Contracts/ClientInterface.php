@@ -22,5 +22,4 @@ interface ClientInterface
      * @return ClientInterface|Response
      */
     public function invoke(string $method, string $uri, array $parameters = [], array $options = []);
-
 }
