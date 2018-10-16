@@ -15,8 +15,6 @@ class Signaller
     const SWOOLE_CLIENT = SwooleClient::class;
     const GUZZLE_CLIENT = GuzzleClient::class;
 
-    const TIMEOUT = 'timeout';
-
     /**
      * @var ClientInterface
      */
@@ -43,7 +41,7 @@ class Signaller
      * @param string $route
      * @param array $parameters
      * @param array $options
-     * @return ClientInterface|Response
+     * @return ClientInterface
      */
     public function invoke(string $serverName, string $route, array $parameters = [], array $options = [])
     {

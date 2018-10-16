@@ -16,7 +16,7 @@ interface ClientInterface
 {
     /**
      *
-     * simple invoke,it will at once return the response
+     * Simple invoke,It will at once return the response object
      *
      * @param string $method
      * @param string $uri
@@ -39,7 +39,7 @@ interface ClientInterface
     public function invoke(string $method, string $uri, array $parameters = [], array $options = []);
 
     /**
-     * @return ClientInterface|Response
+     * @return Response
      */
     public function send();
 }
