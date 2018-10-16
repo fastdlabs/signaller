@@ -15,11 +15,31 @@ use FastD\Signaller\Response;
 interface ClientInterface
 {
     /**
+     *
+     * simple invoke,it will at once return the response
+     *
      * @param string $method
      * @param string $uri
      * @param array $parameters
      * @param array $options
-     * @return ClientInterface|Response
+     * @return Response
+     */
+    public function simpleInvoke(string $method, string $uri, array $parameters = [], array $options = []);
+
+    /**
+     *
+     * When all the invoke are ready. You need call the send method and return the response
+     *
+     * @param string $method
+     * @param string $uri
+     * @param array $parameters
+     * @param array $options
+     * @return $this
      */
     public function invoke(string $method, string $uri, array $parameters = [], array $options = []);
+
+    /**
+     * @return ClientInterface|Response
+     */
+    public function send();
 }

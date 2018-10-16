@@ -6,34 +6,38 @@
 
 ```php
 
+
 require __DIR__ . '/vendor/autoload.php';
 
-use Sdk\Signaller\Sentinel;
-use Sdk\Signaller\Service;
+use FastD\Signaller\Sentinel;
+use FastD\Signaller\Service;
 
+// usage
 
-$sdk = new Service();
-
-$sdk->asyncRequest('demo', 'demo', ['以后'], [
+$sdk = signaller()->asyncRequest('demo', 'demo', $parameter, [
     'headers' => [
-        'x_consumer_custom_id' => 1,
-        'accept_language' => 'zh-TW'
+        
     ],
     'body' => '以后'
 ]);
-$sdk->asyncRequest('demo', 'demo', ['我们以后'], [
-    'headers' => [
-        'x_consumer_custom_id' => 1,
-        'accept_language' => 'zh-TW'
-    ],
-]);
 
-$responses = $sdk->select();
+// $options see guzzle request $options
+$sdk->asyncRequest('demo', 'demo', $parameter, $options);
+
+$responses = $sdk->send();
 
 foreach ($responses as $response) {
     var_dump($response->isSuccessful());
     var_dump($response->toArray());
 }
 
+// also you can use the simpleInvoke method, it will at once return the response
+
+$response  = signaller()->asyncRequest('demo', 'demo', $parameter, [
+    'headers' => [
+        
+    ],
+    'body' => '以后'
+]);
 
 ```

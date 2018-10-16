@@ -42,7 +42,7 @@ class GuzzleClient implements ClientInterface
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function invoke(string $method, string $uri, array $parameters = [], array $options = [])
+    public function simpleInvoke(string $method, string $uri, array $parameters = [], array $options = [])
     {
         $options = array_merge([
             'connect_timeout' => 5,
@@ -58,6 +58,64 @@ class GuzzleClient implements ClientInterface
 
         return Response::createFromResponse($response);
     }
+
+
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param array $parameters
+     * @param array $options
+     * @return $this
+     */
+    public function invoke(string $method, string $uri, array $parameters = [], array $options = [])
+    {
+        $options = array_merge([
+            'connect_timeout' => 5,
+            'timeout' => 5,
+            'http_errors' => false,
+        ], $options);
+
+        $options = $this->createRequestOptions($method, $parameters, $options);
+
+        switch (strtoupper($method)) {
+            case 'GET':
+                $this->promises[] = $this->client->getAsync($uri, $options);
+                break;
+            case 'POST':
+                $this->promises[] = $this->client->postAsync($uri, $options);
+                break;
+            case 'PUT':
+                $this->promises[] = $this->client->putAsync($uri, $options);
+                break;
+            case 'PATCH':
+                $this->promises[] = $this->client->patchAsync($uri, $options);
+                break;
+            case 'DELETE':
+                $this->promises[] = $this->client->deleteAsync($uri, $options);
+                break;
+            case 'HEAD':
+                $this->promises[] = $this->client->headAsync($uri, $options);
+                break;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return array|Response
+     * @throws \Throwable
+     */
+    public function send()
+    {
+        $response = Promise\unwrap($this->promises);
+        if (1 === count($response)) {
+            return current($this->createResponse($response));
+
+        } else {
+            return $this->createResponse($response);
+        }
+    }
+
 
     /**
      * @param $response
