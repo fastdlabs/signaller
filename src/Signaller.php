@@ -53,6 +53,7 @@ class Signaller
 
         if ('' !== $config) {
             // 动态路由进行赋值
+            $keys = [];
             foreach (explode(',', $config) as $item) {
                 list($key, $values[]) = explode(':', $item);
                 $keys[] = "{{$key}}";

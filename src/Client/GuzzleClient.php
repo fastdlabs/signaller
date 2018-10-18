@@ -129,7 +129,7 @@ class GuzzleClient implements ClientInterface
             $responses[] = Response::createFromResponse($item);
         }
 
-        return $responses;
+        return $responses ?? [];
     }
 
     /**

@@ -33,7 +33,7 @@ class Response extends FastDResponse
 
         if ($response instanceof GuzzleResponse) {
             return new static(
-                $response->getBody(),
+                (string)$response->getBody(),
                 $response->getStatusCode(),
                 $response->getHeaders()
             );
@@ -41,7 +41,7 @@ class Response extends FastDResponse
             return $response;
         }
 
-        throw new \Exception('');
+        throw new \Exception('undefined response');
     }
 
     /**
