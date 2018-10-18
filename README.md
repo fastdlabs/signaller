@@ -14,7 +14,7 @@ use FastD\Signaller\Service;
 
 // usage
 
-$sdk = signaller()->asyncRequest('demo', 'demo', $parameter, [
+$sdk = signaller()->invoke('demo', 'demo', $parameter, [
     'headers' => [
         
     ],
@@ -28,16 +28,16 @@ $responses = $sdk->send();
 
 foreach ($responses as $response) {
     var_dump($response->isSuccessful());
-    var_dump($response->toArray());
+    var_dump($response->getBody());
 }
 
-// also you can use the simpleInvoke method, it will at once return the response
+// Also you can use the simpleInvoke method, It will return the response immediately
 
-$response  = signaller()->asyncRequest('demo', 'demo', $parameter, [
+$response  = signaller()->simpleInvoke('demo', 'demo', $parameter, [
     'headers' => [
         
     ],
-    'body' => '以后'
+    'body' => '我们以后'
 ]);
 
 ```
