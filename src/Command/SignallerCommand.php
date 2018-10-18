@@ -1,10 +1,10 @@
 <?php
 /**
  * @author: ZhaQiu <34485431@qq.com>
- * @time: 2018/9/19
+ * @time: 2018/10/18
  */
 
-namespace FastD\Sentinel\Command;
+namespace FastD\Signaller\Command;
 
 use FastD\Signaller\Sentinel;
 use FastD\Signaller\Signaller;

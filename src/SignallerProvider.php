@@ -11,7 +11,7 @@ namespace FastD\Signaller;
 
 use FastD\Container\Container;
 use FastD\Container\ServiceProviderInterface;
-use FastD\Sentinel\Command\SignallerCommand;
+use FastD\Signaller\Command\SignallerCommand;
 
 class SignallerProvider implements ServiceProviderInterface
 {
