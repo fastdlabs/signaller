@@ -12,6 +12,7 @@
         "fastd/swoole": "^2.3",
         "fastd/utils": "^0.2.0",
         "fastd/container": "^3.0",
+        "fastd/fastd": "^3.2",
         "ext-json": "*",
         "ext-curl": "*"
     },

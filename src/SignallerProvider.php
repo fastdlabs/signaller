@@ -11,6 +11,7 @@ namespace FastD\Signaller;
 
 use FastD\Container\Container;
 use FastD\Container\ServiceProviderInterface;
+use FastD\Sentinel\Command\SignallerCommand;
 
 class SignallerProvider implements ServiceProviderInterface
 {
@@ -20,5 +21,11 @@ class SignallerProvider implements ServiceProviderInterface
     public function register(Container $container)
     {
         $container->add('signaller', new Signaller());
+
+        config()->merge([
+            'consoles' => [
+                SignallerCommand::class,
+            ],
+        ]);
     }
 }

@@ -15,12 +15,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class ConfigCommand
+ * Class SignallerCommand
  * @package FastD\Sentinel
  */
-class ConfigCommand extends Command
+class SignallerCommand extends Command
 {
-    const COMMAND_NAME = 'config';
+    const COMMAND_NAME = 'signaller';
 
     protected $path;
 
@@ -101,20 +101,23 @@ class ConfigCommand extends Command
         $table->setHeaders(array('server_name', 'protocol', 'ip', 'host', 'port'));
 
         foreach ($services as $service) {
-            $nodes = include $service;
-            $name = basename($service, '.php');
+            if (file_exists($service)) {
+                $nodes = include $service;
+                $name = basename($service, '.php');
 
-            foreach ($nodes as $node) {
-                $table->addRow(
-                    [
-                        $name,
-                        $node['service_protocol'],
-                        $node['ip'],
-                        $node['service_host'],
-                        $node['service_port'],
-                    ]
-                );
+                foreach ($nodes as $node) {
+                    $table->addRow(
+                        [
+                            $name,
+                            $node['service_protocol'],
+                            $node['ip'],
+                            $node['service_host'],
+                            $node['service_port'],
+                        ]
+                    );
+                }
             }
+
         }
 
         $table->render();
