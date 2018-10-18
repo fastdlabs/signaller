@@ -7,9 +7,12 @@
 namespace FastD\Signaller;
 
 use FastD\Signaller\Contracts\SentinelInterface;
+use FastD\Signaller\Exception\NodeException;
 
 class Sentinel implements SentinelInterface
 {
+
+    const PATH = '/tmp/services';
     /**
      * @var array
      */
@@ -143,11 +146,11 @@ class Sentinel implements SentinelInterface
     {
         if (!isset($this->nodes[$serviceName])) {
             $nodePath = $this->path . '/' . $serviceName . '.php';
+            if (!file_exists($nodePath)) {
+                throw new NodeException('node does not exist');
+            }
             $this->nodes[$serviceName] = include $nodePath;
             $this->node = $this->setNode($this->nodes[$serviceName]);
-            if (!file_exists($nodePath)) {
-                throw new \LogicException();
-            }
         }
 
         return $this->node;

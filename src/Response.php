@@ -6,6 +6,7 @@
 
 namespace FastD\Signaller;
 
+use FastD\Signaller\Exception\ResponseException;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use FastD\Http\Response as FastDResponse;
 
@@ -25,7 +26,7 @@ class Response extends FastDResponse
 
     /**
      * @param $response
-     * @return Response
+     * @return FastDResponse
      * @throws \Exception
      */
     public static function createFromResponse($response)
@@ -41,7 +42,7 @@ class Response extends FastDResponse
             return $response;
         }
 
-        throw new \Exception('undefined response');
+        throw new ResponseException('undefined response');
     }
 
     /**
