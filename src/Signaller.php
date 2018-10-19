@@ -70,6 +70,7 @@ class Signaller
             return $this->client->simpleInvoke($route[0], $uri, $parameters, $options);
         } catch (\Exception $exception) {
             if (null !== $callback && $callback instanceof \Closure) {
+                logger()->error('Signaller error: ' . $exception->getMessage());
                 return $callback();
             } else {
                 throw new SignallerException($exception->getMessage());
