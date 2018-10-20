@@ -9,6 +9,7 @@ namespace FastD\Signaller;
 use FastD\Signaller\Client\GuzzleClient;
 use FastD\Signaller\Client\SwooleClient;
 use FastD\Signaller\Contracts\ClientInterface;
+use FastD\Signaller\Exception\NodeException;
 use FastD\Signaller\Exception\SignallerException;
 
 class Signaller
@@ -28,6 +29,26 @@ class Signaller
      * @var Sentinel
      */
     protected $sentinel;
+
+    /**
+     * @var array
+     */
+    protected $fallback;
+
+    /**
+     * @var int
+     */
+    protected $atomic = 0;
+
+    /**
+     * @var bool
+     */
+    protected $nodeError = false;
+
+    /**
+     * @var bool
+     */
+    protected $nodeMsg = false;
 
     /**
      * Client constructor.
@@ -83,28 +104,93 @@ class Signaller
      * @param string $route
      * @param array $parameters
      * @param array $options
-     * @return ClientInterface
+     * @return $this
      */
     public function invoke(string $serverName, string $route, array $parameters = [], array $options = [])
     {
-        // 解析route, 分离uri参数
-        list($route, $config) = explode('|', false === strpos('|', $route) ? $route . '|' : $route);
 
-        $route = $this->sentinel->route($serverName, $route);
-        $uri = $this->getUri($serverName, $route[1]);
+        /**
+         * 请求计数器
+         */
+        $this->client->atomic($this->atomic);
 
-        if ('' !== $config) {
-            // 动态路由进行赋值
-            $keys = [];
-            foreach (explode(',', $config) as $item) {
-                list($key, $values[]) = explode(':', $item);
-                $keys[] = "{{$key}}";
+        try {
+            // 解析route, 分离uri参数
+            list($route, $config) = explode('|', false === strpos('|', $route) ? $route . '|' : $route);
+
+            $route = $this->sentinel->route($serverName, $route);
+            $uri = $this->getUri($serverName, $route[1]);
+
+            if ('' !== $config) {
+                // 动态路由进行赋值
+                $keys = [];
+                foreach (explode(',', $config) as $item) {
+                    list($key, $values[]) = explode(':', $item);
+                    $keys[] = "{{$key}}";
+                }
+
+                $uri = str_replace($keys, $values, $uri);
             }
 
-            $uri = str_replace($keys, $values, $uri);
+            $this->client->invoke($route[0], $uri, $parameters, $options);
+            $this->client->atomic($this->atomic++);
+        } catch (\Exception $exception) {
+            if (!$this->nodeError) {
+                /**
+                 * 节点错误，生成一个错误调用，处理fallback
+                 */
+                $this->nodeMsg = $exception->getMessage();
+                $this->nodeError = true;
+            } else {
+                /**
+                 * 连续两次调用invoke但没有用fallback,直接抛出错误
+                 */
+                throw new NodeException($exception->getMessage());
+            }
         }
 
-        return $this->client->invoke($route[0], $uri, $parameters, $options);
+        return $this;
+    }
+
+    /**
+     * @param \Closure $closure
+     * @return $this
+     */
+    public function fallback(\Closure $closure, $isRecord = true)
+    {
+        if (!$this->nodeError) {
+            $this->client->fallback($closure, $isRecord, $this->nodeMsg);
+        } else {
+            $this->fallback[$this->atomic] = $closure;
+            $this->atomic++;
+        }
+
+        // 重置节点错误
+        $this->nodeError = false;
+
+        return $this;
+    }
+
+    /**
+     * @return Response
+     */
+    /**
+     * @return mixed
+     */
+    public function send()
+    {
+        $responses = $this->client->send();
+        if (!empty($this->fallback)) {
+            foreach ($this->fallback as $key => $item) {
+                $responses[$key] = $item();
+            }
+        }
+
+        if (1 === count($responses)) {
+            return current($responses);
+        } else {
+            return $responses;
+        }
     }
 
     /**

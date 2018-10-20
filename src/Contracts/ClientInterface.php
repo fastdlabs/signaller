@@ -39,7 +39,21 @@ interface ClientInterface
     public function invoke(string $method, string $uri, array $parameters = [], array $options = []);
 
     /**
-     * @return Response
+     * @param int $number
+     * @return $this
+     */
+    public function atomic(int $number);
+
+    /**
+     * @return array
      */
     public function send();
+
+    /**
+     * @param \Closure $closure
+     * @param bool $isRecord
+     * @param null $nodeMsg
+     * @return $this
+     */
+    public function fallback(\Closure $closure, $isRecord = true, $nodeMsg = null);
 }

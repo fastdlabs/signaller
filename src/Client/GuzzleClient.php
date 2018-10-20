@@ -9,8 +9,10 @@ namespace FastD\Signaller\Client;
 use CURLFile;
 use GuzzleHttp\Client;
 use FastD\Signaller\Contracts\ClientInterface;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise;
 use FastD\Signaller\Response;
+use Psr\Http\Message\ResponseInterface;
 
 class GuzzleClient implements ClientInterface
 {
@@ -26,6 +28,11 @@ class GuzzleClient implements ClientInterface
     protected $promises;
 
     /**
+     * @var int
+     */
+    protected $atomic = 0;
+
+    /**
      * GuzzleClient constructor.
      */
     public function __construct()
@@ -38,7 +45,7 @@ class GuzzleClient implements ClientInterface
      * @param string $uri
      * @param array $parameters
      * @param array $options
-     * @return ClientInterface|Response
+     * @return \FastD\Http\Response|ClientInterface|Response
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
@@ -79,41 +86,52 @@ class GuzzleClient implements ClientInterface
 
         switch (strtoupper($method)) {
             case 'GET':
-                $this->promises[] = $this->client->getAsync($uri, $options);
+                $this->promises[$this->atomic] = $this->client->getAsync($uri, $options);
                 break;
             case 'POST':
-                $this->promises[] = $this->client->postAsync($uri, $options);
+                $this->promises[$this->atomic] = $this->client->postAsync($uri, $options);
                 break;
             case 'PUT':
-                $this->promises[] = $this->client->putAsync($uri, $options);
+                $this->promises[$this->atomic] = $this->client->putAsync($uri, $options);
                 break;
             case 'PATCH':
-                $this->promises[] = $this->client->patchAsync($uri, $options);
+                $this->promises[$this->atomic] = $this->client->patchAsync($uri, $options);
                 break;
             case 'DELETE':
-                $this->promises[] = $this->client->deleteAsync($uri, $options);
+                $this->promises[$this->atomic] = $this->client->deleteAsync($uri, $options);
                 break;
             case 'HEAD':
-                $this->promises[] = $this->client->headAsync($uri, $options);
+                $this->promises[$this->atomic] = $this->client->headAsync($uri, $options);
                 break;
         }
 
         return $this;
     }
 
+    public function fallback(\Closure $closure, $isRecord = true, $nodeMsg = null)
+    {
+        $this->promises[$this->atomic]->then(
+            function (ResponseInterface $response) {
+                return $response;
+            },
+            function (RequestException $exception) use ($closure, $isRecord, $nodeMsg) {
+                $isRecord && logger()->error(null === $nodeMsg ? $exception->getMessage() : $nodeMsg);
+                return $closure;
+            }
+        );
+
+        return $this;
+    }
+
     /**
-     * @return array|Response
+     * @return array
      * @throws \Throwable
      */
     public function send()
     {
         $response = Promise\unwrap($this->promises);
-        if (1 === count($response)) {
-            return current($this->createResponse($response));
 
-        } else {
-            return $this->createResponse($response);
-        }
+        return $this->createResponse($response);
     }
 
 
@@ -186,5 +204,16 @@ class GuzzleClient implements ClientInterface
         }
 
         return $return;
+    }
+
+    /**
+     * @param int $number
+     * @return $this
+     */
+    public function atomic(int $number)
+    {
+        $this->atomic = $number;
+
+        return $this;
     }
 }
