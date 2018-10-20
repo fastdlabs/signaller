@@ -38,7 +38,7 @@ class Signaller
     /**
      * @var int
      */
-    protected $atomic = 0;
+    protected $atomic = -1;
 
     /**
      * @var bool
@@ -112,7 +112,9 @@ class Signaller
         /**
          * 请求计数器
          */
+        $this->atomic++;
         $this->client->atomic($this->atomic);
+        $this->nodeError = false;
 
         try {
             // 解析route, 分离uri参数
@@ -133,11 +135,11 @@ class Signaller
             }
 
             $this->client->invoke($route[0], $uri, $parameters, $options);
-            $this->client->atomic($this->atomic++);
+            //$this->client->atomic($this->atomic++);
         } catch (\Exception $exception) {
             if (!$this->nodeError) {
                 /**
-                 * 节点错误，生成一个错误调用，处理fallback
+                 * 节点错误，记录错误信息
                  */
                 $this->nodeMsg = $exception->getMessage();
                 $this->nodeError = true;
@@ -160,13 +162,10 @@ class Signaller
     {
         if (!$this->nodeError) {
             $this->client->fallback($closure, $isRecord, $this->nodeMsg);
+            $this->nodeMsg = false;
         } else {
             $this->fallback[$this->atomic] = $closure;
-            $this->atomic++;
         }
-
-        // 重置节点错误
-        $this->nodeError = false;
 
         return $this;
     }
@@ -180,7 +179,12 @@ class Signaller
     public function send()
     {
         $responses = $this->client->send();
+
+        //var_dump(array_keys($responses));
         if (!empty($this->fallback)) {
+            /**
+             * @var $item \Closure
+             */
             foreach ($this->fallback as $key => $item) {
                 $responses[$key] = $item();
             }

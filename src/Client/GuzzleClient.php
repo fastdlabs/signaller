@@ -142,9 +142,9 @@ class GuzzleClient implements ClientInterface
      */
     public function createResponse($response)
     {
-        foreach ($response as $item) {
+        foreach ($response as $key => $item) {
             //yield Response::createFromResponse($item);
-            $responses[] = Response::createFromResponse($item);
+            $responses[$key] = Response::createFromResponse($item);
         }
 
         return $responses ?? [];
