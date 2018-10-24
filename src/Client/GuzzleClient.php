@@ -33,11 +33,20 @@ class GuzzleClient implements ClientInterface
     protected $atomic = 0;
 
     /**
-     * GuzzleClient constructor.
+     * @var array
      */
-    public function __construct()
+    protected $fallback = [];
+
+    protected $isRecord = true;
+
+    /**
+     * GuzzleClient constructor.
+     * @param bool $isRecord
+     */
+    public function __construct($isRecord = true)
     {
         $this->client = new Client();
+        $this->isRecord = $isRecord;
     }
 
     /**
@@ -110,6 +119,7 @@ class GuzzleClient implements ClientInterface
 
     public function fallback(\Closure $closure, $isRecord = true, $nodeMsg = null)
     {
+        $this->fallback[$this->atomic] = $closure;
         $this->promises[$this->atomic]->then(
             function (ResponseInterface $response) {
                 return $response;
@@ -130,9 +140,16 @@ class GuzzleClient implements ClientInterface
     public function send()
     {
         if ($this->promises) {
-            $response = Promise\unwrap($this->promises);
+            foreach ($this->promises as $key => $promise) {
+                try {
+                    $this->atomic = $key;
+                    $response[$key] = Response::createFromResponse($promise->wait());
+                } catch (\Exception $exception) {
+                    $response[$this->atomic] = $this->fallback[$this->atomic]();
+                }
+            }
 
-            return $this->createResponse($response);
+            return $response ?? [];
         } else {
             return [];
         }

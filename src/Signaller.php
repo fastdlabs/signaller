@@ -16,49 +16,44 @@ class Signaller
 {
 
     const VERSION = '0.0.1-beta';
-
     const SWOOLE_CLIENT = SwooleClient::class;
     const GUZZLE_CLIENT = GuzzleClient::class;
-
     /**
      * @var ClientInterface
      */
     protected $client;
-
     /**
      * @var Sentinel
      */
     protected $sentinel;
-
     /**
      * @var array
      */
     protected $fallback;
-
     /**
      * @var int
      */
     protected $atomic = -1;
-
     /**
      * @var bool
      */
     protected $nodeError = false;
-
     /**
      * @var bool
      */
     protected $nodeMsg = false;
+    protected $isRecord = true;
 
     /**
      * Client constructor.
      * @param string $client
      * @param string $path
      */
-    public function __construct(string $client = self::GUZZLE_CLIENT, string $path = '/tmp/services')
+    public function __construct(string $client = self::GUZZLE_CLIENT, string $path = '/tmp/services', $isRecord = true)
     {
         $this->setClient($client);
         $this->sentinel = new Sentinel($path);
+        $this->isRecord = $isRecord;
     }
 
     /**
@@ -73,10 +68,8 @@ class Signaller
         try {
             // 解析route, 分离uri参数
             list($route, $config) = explode('|', false === strpos('|', $route) ? $route . '|' : $route);
-
             $route = $this->sentinel->route($serverName, $route);
             $uri = $this->getUri($serverName, $route[1]);
-
             if ('' !== $config) {
                 // 动态路由进行赋值
                 $keys = [];
@@ -84,14 +77,14 @@ class Signaller
                     list($key, $values[]) = explode(':', $item);
                     $keys[] = "{{$key}}";
                 }
-
                 $uri = str_replace($keys, $values, $uri);
             }
 
             return $this->client->simpleInvoke($route[0], $uri, $parameters, $options);
         } catch (\Exception $exception) {
             if (null !== $callback && $callback instanceof \Closure) {
-                logger()->error('Signaller error: ' . $exception->getMessage());
+                $this->isRecord && logger()->error('Signaller error: ' . $exception->getMessage());
+
                 return $callback();
             } else {
                 throw new SignallerException($exception->getMessage());
@@ -108,21 +101,17 @@ class Signaller
      */
     public function invoke(string $serverName, string $route, array $parameters = [], array $options = [])
     {
-
         /**
          * 请求计数器
          */
         $this->atomic++;
         $this->client->atomic($this->atomic);
         $this->nodeError = false;
-
         try {
             // 解析route, 分离uri参数
             list($route, $config) = explode('|', false === strpos('|', $route) ? $route . '|' : $route);
-
             $route = $this->sentinel->route($serverName, $route);
             $uri = $this->getUri($serverName, $route[1]);
-
             if ('' !== $config) {
                 // 动态路由进行赋值
                 $keys = [];
@@ -130,10 +119,8 @@ class Signaller
                     list($key, $values[]) = explode(':', $item);
                     $keys[] = "{{$key}}";
                 }
-
                 $uri = str_replace($keys, $values, $uri);
             }
-
             $this->client->invoke($route[0], $uri, $parameters, $options);
             //$this->client->atomic($this->atomic++);
         } catch (\Exception $exception) {
@@ -179,7 +166,6 @@ class Signaller
     public function send()
     {
         $responses = $this->client->send();
-
         if (!empty($this->fallback)) {
             /**
              * @var $item \Closure
@@ -188,7 +174,6 @@ class Signaller
                 $responses[$key] = $item();
             }
         }
-
         if (1 === count($responses)) {
             return current($responses);
         } else {
