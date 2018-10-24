@@ -129,9 +129,13 @@ class GuzzleClient implements ClientInterface
      */
     public function send()
     {
-        $response = Promise\unwrap($this->promises);
+        if ($this->promises) {
+            $response = Promise\unwrap($this->promises);
 
-        return $this->createResponse($response);
+            return $this->createResponse($response);
+        } else {
+            return [];
+        }
     }
 
 

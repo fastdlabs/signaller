@@ -46,4 +46,24 @@ class SwooleClient implements ClientInterface
     {
         // TODO: Implement invoke() method.
     }
+
+    /**
+     * @param int $number
+     * @return $this
+     */
+    public function atomic(int $number)
+    {
+        // TODO: Implement atomic() method.
+    }
+
+    /**
+     * @param \Closure $closure
+     * @param bool $isRecord
+     * @param null $nodeMsg
+     * @return $this
+     */
+    public function fallback(\Closure $closure, $isRecord = true, $nodeMsg = null)
+    {
+        // TODO: Implement fallback() method.
+    }
 }

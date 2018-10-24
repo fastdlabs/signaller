@@ -180,7 +180,6 @@ class Signaller
     {
         $responses = $this->client->send();
 
-        //var_dump(array_keys($responses));
         if (!empty($this->fallback)) {
             /**
              * @var $item \Closure
