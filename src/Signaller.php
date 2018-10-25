@@ -39,9 +39,12 @@ class Signaller
      */
     protected $nodeError = false;
     /**
-     * @var bool
+     * @var null
      */
     protected $nodeMsg = false;
+    /**
+     * @var bool
+     */
     protected $isRecord = true;
 
     /**
@@ -145,11 +148,11 @@ class Signaller
      * @param \Closure $closure
      * @return $this
      */
-    public function fallback(\Closure $closure, $isRecord = true)
+    public function fallback(\Closure $closure)
     {
         if (!$this->nodeError) {
-            $this->client->fallback($closure, $isRecord, $this->nodeMsg);
-            $this->nodeMsg = false;
+            $this->client->fallback($closure, $this->nodeMsg);
+            $this->nodeMsg = null;
         } else {
             $this->isRecord && logger()->error($this->nodeMsg);
             $this->fallback[$this->atomic] = $closure;
@@ -159,10 +162,7 @@ class Signaller
     }
 
     /**
-     * @return Response
-     */
-    /**
-     * @return mixed
+     * @return array|Response
      */
     public function send()
     {
