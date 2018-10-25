@@ -67,7 +67,7 @@ class Signaller
     {
         try {
             // 解析route, 分离uri参数
-            list($route, $config) = explode('|', false === strpos('|', $route) ? $route . '|' : $route);
+            [$route, $config] = explode('|', false === strpos('|', $route) ? $route . '|' : $route);
             $route = $this->sentinel->route($serverName, $route);
             $uri = $this->getUri($serverName, $route[1]);
             if ('' !== $config) {
@@ -109,7 +109,7 @@ class Signaller
         $this->nodeError = false;
         try {
             // 解析route, 分离uri参数
-            list($route, $config) = explode('|', false === strpos('|', $route) ? $route . '|' : $route);
+            [$route, $config] = explode('|', false === strpos('|', $route) ? $route . '|' : $route);
             $route = $this->sentinel->route($serverName, $route);
             $uri = $this->getUri($serverName, $route[1]);
             if ('' !== $config) {
@@ -151,6 +151,7 @@ class Signaller
             $this->client->fallback($closure, $isRecord, $this->nodeMsg);
             $this->nodeMsg = false;
         } else {
+            $this->isRecord && logger()->error($this->nodeMsg);
             $this->fallback[$this->atomic] = $closure;
         }
 

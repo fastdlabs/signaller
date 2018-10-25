@@ -37,6 +37,9 @@ class GuzzleClient implements ClientInterface
      */
     protected $fallback = [];
 
+    /**
+     * @var bool
+     */
     protected $isRecord = true;
 
     /**
@@ -117,15 +120,20 @@ class GuzzleClient implements ClientInterface
         return $this;
     }
 
-    public function fallback(\Closure $closure, $isRecord = true, $nodeMsg = null)
+    /**
+     * @param \Closure $closure
+     * @param null $nodeMsg
+     * @return $this|ClientInterface
+     */
+    public function fallback(\Closure $closure, $nodeMsg = null)
     {
         $this->fallback[$this->atomic] = $closure;
         $this->promises[$this->atomic]->then(
             function (ResponseInterface $response) {
                 return $response;
             },
-            function (RequestException $exception) use ($closure, $isRecord, $nodeMsg) {
-                $isRecord && logger()->error(null === $nodeMsg ? $exception->getMessage() : $nodeMsg);
+            function (RequestException $exception) use ($closure, $nodeMsg) {
+                $this->isRecord && logger()->error(null === $nodeMsg ? $exception->getMessage() : $nodeMsg);
                 return $closure;
             }
         );
@@ -145,6 +153,7 @@ class GuzzleClient implements ClientInterface
                     $this->atomic = $key;
                     $response[$key] = Response::createFromResponse($promise->wait());
                 } catch (\Exception $exception) {
+                    $this->isRecord && logger()->error($exception->getMessage());
                     $response[$this->atomic] = $this->fallback[$this->atomic]();
                 }
             }

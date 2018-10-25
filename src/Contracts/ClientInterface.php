@@ -51,9 +51,8 @@ interface ClientInterface
 
     /**
      * @param \Closure $closure
-     * @param bool $isRecord
      * @param null $nodeMsg
      * @return $this
      */
-    public function fallback(\Closure $closure, $isRecord = true, $nodeMsg = null);
+    public function fallback(\Closure $closure, $nodeMsg = null);
 }
