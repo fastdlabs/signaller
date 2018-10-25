@@ -41,7 +41,7 @@ class Signaller
     /**
      * @var null
      */
-    protected $nodeMsg = false;
+    protected $nodeMsg = null;
     /**
      * @var bool
      */
@@ -109,6 +109,8 @@ class Signaller
          */
         $this->atomic++;
         $this->client->atomic($this->atomic);
+        var_dump($this->atomic);
+
         $this->nodeError = false;
         try {
             // 解析route, 分离uri参数
@@ -175,6 +177,7 @@ class Signaller
                 $responses[$key] = $item();
             }
         }
+        $this->destruct();
         if (1 === count($responses)) {
             return current($responses);
         } else {
@@ -209,5 +212,12 @@ class Signaller
             default:
                 $this->client = new GuzzleClient();
         }
+    }
+
+    public function destruct()
+    {
+        $this->atomic = -1;
+        $this->nodeMsg = null;
+        $this->nodeError = false;
     }
 }

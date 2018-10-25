@@ -145,11 +145,11 @@ class GuzzleClient implements ClientInterface
                     }
                 }
             }
-
-            return $response ?? [];
-        } else {
-            return [];
         }
+        $this->destruct();
+
+        return $response ?? [];
+
     }
 
     /**
@@ -231,5 +231,12 @@ class GuzzleClient implements ClientInterface
         $this->atomic = $number;
 
         return $this;
+    }
+
+    public function destruct()
+    {
+        $this->promises = [];
+        $this->fallback = [];
+        $this->atomic = 0;
     }
 }
