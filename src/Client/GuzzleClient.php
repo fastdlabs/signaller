@@ -7,6 +7,7 @@
 namespace FastD\Signaller\Client;
 
 use CURLFile;
+use FastD\Signaller\Exception\SignallerException;
 use GuzzleHttp\Client;
 use FastD\Signaller\Contracts\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
@@ -21,22 +22,18 @@ class GuzzleClient implements ClientInterface
      * @var Client
      */
     protected $client;
-
     /**
      * @var Client[]
      */
     protected $promises;
-
     /**
      * @var int
      */
     protected $atomic = 0;
-
     /**
      * @var array
      */
     protected $fallback = [];
-
     /**
      * @var bool
      */
@@ -68,7 +65,6 @@ class GuzzleClient implements ClientInterface
             'timeout' => 5,
             'http_errors' => false,
         ], $options);
-
         $response = $this->client->request(
             $method,
             $uri,
@@ -77,7 +73,6 @@ class GuzzleClient implements ClientInterface
 
         return Response::createFromResponse($response);
     }
-
 
     /**
      * @param string $method
@@ -90,12 +85,10 @@ class GuzzleClient implements ClientInterface
     {
         $options = array_merge([
             'connect_timeout' => 5,
-            'timeout' => 5,
+            'timeout' => 2,
             'http_errors' => false,
         ], $options);
-
         $options = $this->createRequestOptions($method, $parameters, $options);
-
         switch (strtoupper($method)) {
             case 'GET':
                 $this->promises[$this->atomic] = $this->client->getAsync($uri, $options);
@@ -128,15 +121,6 @@ class GuzzleClient implements ClientInterface
     public function fallback(\Closure $closure, $nodeMsg = null)
     {
         $this->fallback[$this->atomic] = $closure;
-        $this->promises[$this->atomic]->then(
-            function (ResponseInterface $response) {
-                return $response;
-            },
-            function (RequestException $exception) use ($closure, $nodeMsg) {
-                $this->isRecord && logger()->error(null === $nodeMsg ? $exception->getMessage() : $nodeMsg);
-                return $closure;
-            }
-        );
 
         return $this;
     }
@@ -153,8 +137,12 @@ class GuzzleClient implements ClientInterface
                     $this->atomic = $key;
                     $response[$key] = Response::createFromResponse($promise->wait());
                 } catch (\Exception $exception) {
-                    $this->isRecord && logger()->error($exception->getMessage());
-                    $response[$this->atomic] = $this->fallback[$this->atomic]();
+                    if (isset($this->fallback[$this->atomic])) {
+                        $this->isRecord && logger()->error('Signaller error: ' . $exception->getMessage());
+                        $response[$this->atomic] = $this->fallback[$this->atomic]();
+                    } else {
+                        throw new SignallerException($exception->getMessage());
+                    }
                 }
             }
 
@@ -163,7 +151,6 @@ class GuzzleClient implements ClientInterface
             return [];
         }
     }
-
 
     /**
      * @param $response
@@ -208,7 +195,6 @@ class GuzzleClient implements ClientInterface
     protected function createMultipart(array $parameters, $prefix = '')
     {
         $return = [];
-
         foreach ($parameters as $name => $value) {
             $item = [
                 'name' => empty($prefix) ? $name : "{$prefix}[{$name}]",

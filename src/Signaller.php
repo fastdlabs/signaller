@@ -154,7 +154,7 @@ class Signaller
             $this->client->fallback($closure, $this->nodeMsg);
             $this->nodeMsg = null;
         } else {
-            $this->isRecord && logger()->error($this->nodeMsg);
+            $this->isRecord && logger()->error('Signaller error: ' . $this->nodeMsg);
             $this->fallback[$this->atomic] = $closure;
         }
 
