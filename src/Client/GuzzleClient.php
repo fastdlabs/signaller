@@ -136,6 +136,13 @@ class GuzzleClient implements ClientInterface
                 try {
                     $this->atomic = $key;
                     $response[$key] = Response::createFromResponse($promise->wait());
+                    //  这步骤也可以放到 promise->then 处理，这里在这边统一处理，因为机制问题，可能触发三次 = =
+                    if (!$response[$key]->isSuccessful()) {
+                        if (isset($this->fallback[$this->atomic])) {
+                            $this->isRecord && logger()->error('Signaller error: ' . $response[$key]->getContents());
+                            $response[$this->atomic] = $this->fallback[$this->atomic]();
+                        }
+                    }
                 } catch (\Exception $exception) {
                     if (isset($this->fallback[$this->atomic])) {
                         $this->isRecord && logger()->error('Signaller error: ' . $exception->getMessage());
