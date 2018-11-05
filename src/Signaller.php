@@ -109,7 +109,6 @@ class Signaller
          */
         $this->atomic++;
         $this->client->atomic($this->atomic);
-        var_dump($this->atomic);
 
         $this->nodeError = false;
         try {
